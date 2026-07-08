@@ -1,0 +1,44 @@
+{
+  "name": "security-framework",
+  "version": "1.0.0",
+  "description": "Plug-and-play website security scanning framework orchestrating Katana, OWASP ZAP, and Nuclei with a single command.",
+  "main": "index.js",
+  "bin": {
+    "security-framework": "./bin/cli.js"
+  },
+  "files": [
+    "index.js",
+    "bin",
+    "core",
+    "config",
+    "templates",
+    "README.md",
+    "LICENSE"
+  ],
+  "type": "commonjs",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "scripts": {
+    "scan": "node bin/cli.js scan",
+    "test": "node --test test/*.test.js",
+    "clean": "node bin/cli.js clean"
+  },
+  "keywords": [
+    "security",
+    "devsecops",
+    "zap",
+    "nuclei",
+    "katana",
+    "scanner",
+    "sast",
+    "dast"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "commander": "^12.1.0",
+    "js-yaml": "^4.1.0"
+  },
+  "devDependencies": {}
+}

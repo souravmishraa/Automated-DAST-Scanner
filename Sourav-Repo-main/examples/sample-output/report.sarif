@@ -1,0 +1,300 @@
+{
+  "$schema": "https://raw.githubusercontent.com/oasis-tcs/sarif-spec/master/Schemata/sarif-schema-2.1.0.json",
+  "version": "2.1.0",
+  "runs": [
+    {
+      "tool": {
+        "driver": {
+          "name": "security-framework",
+          "informationUri": "https://github.com/your-org/security-framework",
+          "version": "1.0.0",
+          "rules": [
+            {
+              "id": "nuclei/cve,-rce,-critical",
+              "name": "Outdated Framework - Known RCE",
+              "shortDescription": {
+                "text": "Outdated Framework - Known RCE"
+              },
+              "fullDescription": {
+                "text": "The detected framework version is affected by a known unauthenticated remote code execution vulnerability."
+              },
+              "help": {
+                "text": "Upgrade to the latest patched version immediately."
+              },
+              "properties": {
+                "tags": [
+                  "nuclei",
+                  "critical",
+                  "CWE-502",
+                  "CVE-2024-0001"
+                ]
+              },
+              "defaultConfiguration": {
+                "level": "error"
+              }
+            },
+            {
+              "id": "zap/ZAP-40012",
+              "name": "Cross Site Scripting (Reflected)",
+              "shortDescription": {
+                "text": "Cross Site Scripting (Reflected)"
+              },
+              "fullDescription": {
+                "text": "A reflected XSS was identified in the search parameter, allowing arbitrary script execution in the victim browser context."
+              },
+              "help": {
+                "text": "Contextually encode all user-controlled output and adopt a strict Content-Security-Policy."
+              },
+              "properties": {
+                "tags": [
+                  "zap",
+                  "high",
+                  "CWE-79"
+                ]
+              },
+              "defaultConfiguration": {
+                "level": "error"
+              }
+            },
+            {
+              "id": "nuclei/exposure,-git",
+              "name": "Exposed .git Directory",
+              "shortDescription": {
+                "text": "Exposed .git Directory"
+              },
+              "fullDescription": {
+                "text": "The .git directory is publicly accessible, potentially exposing source code and history."
+              },
+              "help": {
+                "text": "Review the finding and apply the relevant vendor patch or mitigation."
+              },
+              "properties": {
+                "tags": [
+                  "nuclei",
+                  "high"
+                ]
+              },
+              "defaultConfiguration": {
+                "level": "error"
+              }
+            },
+            {
+              "id": "nuclei/default-logins",
+              "name": "Default Admin Credentials Accepted",
+              "shortDescription": {
+                "text": "Default Admin Credentials Accepted"
+              },
+              "fullDescription": {
+                "text": "The admin panel accepted a well-known default credential pair."
+              },
+              "help": {
+                "text": "Review the finding and apply the relevant vendor patch or mitigation."
+              },
+              "properties": {
+                "tags": [
+                  "nuclei",
+                  "high"
+                ]
+              },
+              "defaultConfiguration": {
+                "level": "error"
+              }
+            },
+            {
+              "id": "zap/ZAP-10202",
+              "name": "Absence of Anti-CSRF Tokens",
+              "shortDescription": {
+                "text": "Absence of Anti-CSRF Tokens"
+              },
+              "fullDescription": {
+                "text": "No anti-CSRF token was found in a HTML submission form."
+              },
+              "help": {
+                "text": "Use anti-CSRF tokens on all state-changing forms."
+              },
+              "properties": {
+                "tags": [
+                  "zap",
+                  "medium",
+                  "CWE-352"
+                ]
+              },
+              "defaultConfiguration": {
+                "level": "warning"
+              }
+            },
+            {
+              "id": "zap/ZAP-10038",
+              "name": "Content Security Policy (CSP) Header Not Set",
+              "shortDescription": {
+                "text": "Content Security Policy (CSP) Header Not Set"
+              },
+              "fullDescription": {
+                "text": "The Content-Security-Policy header is not set on responses, reducing defense-in-depth against XSS and data injection."
+              },
+              "help": {
+                "text": "Add an appropriately scoped Content-Security-Policy header."
+              },
+              "properties": {
+                "tags": [
+                  "zap",
+                  "low",
+                  "CWE-693"
+                ]
+              },
+              "defaultConfiguration": {
+                "level": "note"
+              }
+            }
+          ]
+        }
+      },
+      "results": [
+        {
+          "ruleId": "nuclei/cve,-rce,-critical",
+          "level": "error",
+          "message": {
+            "text": "The detected framework version is affected by a known unauthenticated remote code execution vulnerability."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "https://demo.example.com/api/admin/settings"
+                }
+              }
+            }
+          ],
+          "properties": {
+            "severity": "critical",
+            "tool": "nuclei",
+            "parameter": null,
+            "evidence": null,
+            "cwe": "CWE-502",
+            "cve": "CVE-2024-0001"
+          }
+        },
+        {
+          "ruleId": "zap/ZAP-40012",
+          "level": "error",
+          "message": {
+            "text": "A reflected XSS was identified in the search parameter, allowing arbitrary script execution in the victim browser context."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "https://demo.example.com/search?q=%3Cscript%3E"
+                }
+              }
+            }
+          ],
+          "properties": {
+            "severity": "high",
+            "tool": "zap",
+            "parameter": "q",
+            "evidence": "<script>alert(1)</script>",
+            "cwe": "CWE-79",
+            "cve": null
+          }
+        },
+        {
+          "ruleId": "nuclei/exposure,-git",
+          "level": "error",
+          "message": {
+            "text": "The .git directory is publicly accessible, potentially exposing source code and history."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "https://demo.example.com/.git/config"
+                }
+              }
+            }
+          ],
+          "properties": {
+            "severity": "high",
+            "tool": "nuclei",
+            "parameter": null,
+            "evidence": null,
+            "cwe": null,
+            "cve": null
+          }
+        },
+        {
+          "ruleId": "nuclei/default-logins",
+          "level": "error",
+          "message": {
+            "text": "The admin panel accepted a well-known default credential pair."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "https://demo.example.com/admin"
+                }
+              }
+            }
+          ],
+          "properties": {
+            "severity": "high",
+            "tool": "nuclei",
+            "parameter": null,
+            "evidence": null,
+            "cwe": null,
+            "cve": null
+          }
+        },
+        {
+          "ruleId": "zap/ZAP-10202",
+          "level": "warning",
+          "message": {
+            "text": "No anti-CSRF token was found in a HTML submission form."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "https://demo.example.com/account/update"
+                }
+              }
+            }
+          ],
+          "properties": {
+            "severity": "medium",
+            "tool": "zap",
+            "parameter": null,
+            "evidence": null,
+            "cwe": "CWE-352",
+            "cve": null
+          }
+        },
+        {
+          "ruleId": "zap/ZAP-10038",
+          "level": "note",
+          "message": {
+            "text": "The Content-Security-Policy header is not set on responses, reducing defense-in-depth against XSS and data injection."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "https://demo.example.com/"
+                }
+              }
+            }
+          ],
+          "properties": {
+            "severity": "low",
+            "tool": "zap",
+            "parameter": null,
+            "evidence": null,
+            "cwe": "CWE-693",
+            "cve": null
+          }
+        }
+      ]
+    }
+  ]
+}

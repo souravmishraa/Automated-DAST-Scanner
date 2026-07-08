@@ -1,0 +1,7 @@
+{
+  "target": "https://your-app.example.com",
+  "authentication": {
+    "type": "none"
+  },
+  "failOn": "critical"
+}

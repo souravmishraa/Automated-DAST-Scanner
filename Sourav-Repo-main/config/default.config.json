@@ -1,0 +1,69 @@
+{
+  "target": null,
+  "authentication": {
+    "type": "none",
+    "username": null,
+    "password": null,
+    "token": null,
+    "apiKeyHeader": "X-API-Key",
+    "apiKeyValue": null,
+    "loginUrl": null,
+    "usernameField": "username",
+    "passwordField": "password",
+    "loggedInIndicator": null,
+    "loggedOutIndicator": null,
+    "cookie": null
+  },
+  "crawler": {
+    "katana": {
+      "depth": 3,
+      "jsCrawl": true,
+      "formExtraction": true,
+      "concurrency": 10,
+      "timeoutSeconds": 120,
+      "maxPages": 500,
+      "headless": false,
+      "rateLimit": 150
+    }
+  },
+  "apiDiscovery": {
+    "enabled": true,
+    "paths": [
+      "/swagger.json",
+      "/openapi.json",
+      "/api-docs",
+      "/v2/api-docs",
+      "/v3/api-docs",
+      "/swagger/v1/swagger.json",
+      "/.well-known/openapi.json"
+    ]
+  },
+  "zap": {
+    "mode": "docker",
+    "dockerImage": "zaproxy/zap-stable",
+    "passiveScan": true,
+    "activeScan": true,
+    "ajaxSpider": false,
+    "spiderMaxDurationMinutes": 10,
+    "activeScanMaxDurationMinutes": 30,
+    "contextName": "security-framework-context"
+  },
+  "nuclei": {
+    "severities": ["info", "low", "medium", "high", "critical"],
+    "templates": ["cves", "vulnerabilities", "exposures", "misconfiguration", "default-logins"],
+    "rateLimit": 150,
+    "concurrency": 25,
+    "timeoutSeconds": 900
+  },
+  "reporting": {
+    "outputDir": "./output",
+    "formats": ["html", "json", "sarif"],
+    "branding": {
+      "companyName": "Security Framework",
+      "logoUrl": null,
+      "primaryColor": "#6366f1"
+    }
+  },
+  "failOn": "critical",
+  "logLevel": "info"
+}

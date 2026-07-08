@@ -1,0 +1,118 @@
+name: Security Scan
+
+# Runs the security-framework scan pipeline identically to a local run.
+# Requires: repo variable / input TARGET_URL, and optionally secrets for auth.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      target:
+        description: 'Target URL to scan'
+        required: true
+        default: 'https://example.com'
+      fail_on:
+        description: 'Fail the build on findings at/above this severity'
+        required: false
+        default: 'critical'
+
+permissions:
+  contents: read
+  security-events: write # required to upload SARIF to GitHub code scanning
+  actions: read
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci --no-audit --no-fund
+
+      - name: Install Katana
+        run: |
+          curl -sSfL https://raw.githubusercontent.com/projectdiscovery/katana/main/static/install.sh | sh || \
+          (go install github.com/projectdiscovery/katana/cmd/katana@latest && echo "$HOME/go/bin" >> "$GITHUB_PATH")
+        continue-on-error: true
+
+      - name: Install Nuclei
+        run: |
+          go install github.com/projectdiscovery/nuclei/v3/cmd/nuclei@latest && echo "$HOME/go/bin" >> "$GITHUB_PATH"
+        continue-on-error: true
+
+      - name: Pull ZAP Docker image
+        run: docker pull zaproxy/zap-stable
+
+      - name: Build auth file from secrets (if configured)
+        id: auth
+        env:
+          SCAN_AUTH_USERNAME: ${{ secrets.SCAN_AUTH_USERNAME }}
+          SCAN_AUTH_PASSWORD: ${{ secrets.SCAN_AUTH_PASSWORD }}
+          SCAN_AUTH_TOKEN: ${{ secrets.SCAN_AUTH_TOKEN }}
+        run: |
+          if [ -n "$SCAN_AUTH_TOKEN" ]; then
+            printf '{"type":"bearer","token":"%s"}' "$SCAN_AUTH_TOKEN" > auth.json
+            echo "path=auth.json" >> "$GITHUB_OUTPUT"
+          elif [ -n "$SCAN_AUTH_USERNAME" ] && [ -n "$SCAN_AUTH_PASSWORD" ]; then
+            printf '{"type":"basic","username":"%s","password":"%s"}' "$SCAN_AUTH_USERNAME" "$SCAN_AUTH_PASSWORD" > auth.json
+            echo "path=auth.json" >> "$GITHUB_OUTPUT"
+          else
+            echo "path=" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Run security scan
+        id: scan
+        env:
+          SCAN_TARGET: ${{ github.event.inputs.target || vars.SECURITY_SCAN_TARGET || 'https://example.com' }}
+          SCAN_FAIL_ON: ${{ github.event.inputs.fail_on || 'critical' }}
+          AUTH_PATH: ${{ steps.auth.outputs.path }}
+        run: |
+          if [ -n "$AUTH_PATH" ]; then
+            node bin/cli.js scan "$SCAN_TARGET" --auth "$AUTH_PATH" --fail-on "$SCAN_FAIL_ON" --output ./output
+          else
+            node bin/cli.js scan "$SCAN_TARGET" --fail-on "$SCAN_FAIL_ON" --output ./output
+          fi
+        continue-on-error: true
+
+      - name: Remove auth file
+        if: always()
+        run: rm -f auth.json
+
+      - name: Locate latest report directory
+        id: locate
+        run: |
+          LATEST_DIR=$(ls -td ./output/*/ | head -1)
+          echo "dir=$LATEST_DIR" >> "$GITHUB_OUTPUT"
+
+      - name: Upload SARIF to GitHub Code Scanning
+        if: always()
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: ${{ steps.locate.outputs.dir }}report.sarif
+
+      - name: Upload scan artifacts (HTML/JSON/SARIF)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: security-scan-report
+          path: ${{ steps.locate.outputs.dir }}
+          retention-days: 30
+
+      - name: Fail build if scan step failed threshold
+        if: steps.scan.outcome == 'failure'
+        run: |
+          echo "Security scan found findings at or above the configured '--fail-on' threshold."
+          exit 1

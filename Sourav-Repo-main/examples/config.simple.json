@@ -1,0 +1,6 @@
+{
+  "target": "https://example.com",
+  "authentication": {
+    "type": "none"
+  }
+}

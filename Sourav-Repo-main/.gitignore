@@ -1,0 +1,8 @@
+node_modules/
+output/
+*.tgz
+*.log
+.env
+.DS_Store
+auth.json
+*.auth.json

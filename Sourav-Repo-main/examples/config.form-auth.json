@@ -1,0 +1,18 @@
+{
+  "target": "https://staging.example.com",
+  "authentication": {
+    "type": "form",
+    "loginUrl": "https://staging.example.com/login",
+    "username": "test-user@example.com",
+    "password": "REPLACE_ME",
+    "usernameField": "email",
+    "passwordField": "password",
+    "loggedInIndicator": "Sign out",
+    "loggedOutIndicator": "Sign in"
+  },
+  "zap": {
+    "activeScanMaxDurationMinutes": 45,
+    "spiderMaxDurationMinutes": 15
+  },
+  "failOn": "high"
+}

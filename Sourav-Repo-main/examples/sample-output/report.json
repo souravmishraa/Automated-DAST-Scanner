@@ -1,0 +1,113 @@
+{
+  "target": "https://demo.example.com",
+  "scannedAt": "2026-07-07T04:00:00.000Z",
+  "completedAt": "2026-07-07T04:18:32.000Z",
+  "summary": {
+    "critical": 1,
+    "high": 3,
+    "medium": 1,
+    "low": 1,
+    "info": 0,
+    "total": 6
+  },
+  "findings": [
+    {
+      "id": "26dd1acd378e67f7",
+      "tool": "nuclei",
+      "severity": "critical",
+      "category": "cve, rce, critical",
+      "title": "Outdated Framework - Known RCE",
+      "description": "The detected framework version is affected by a known unauthenticated remote code execution vulnerability.",
+      "url": "https://demo.example.com/api/admin/settings",
+      "parameter": null,
+      "evidence": null,
+      "recommendation": "Upgrade to the latest patched version immediately.",
+      "cwe": "CWE-502",
+      "cve": "CVE-2024-0001",
+      "references": [
+        "https://nvd.nist.gov/vuln/detail/CVE-2024-0001"
+      ]
+    },
+    {
+      "id": "6ceeab43bdb67646",
+      "tool": "zap",
+      "severity": "high",
+      "category": "ZAP-40012",
+      "title": "Cross Site Scripting (Reflected)",
+      "description": "A reflected XSS was identified in the search parameter, allowing arbitrary script execution in the victim browser context.",
+      "url": "https://demo.example.com/search?q=%3Cscript%3E",
+      "parameter": "q",
+      "evidence": "<script>alert(1)</script>",
+      "recommendation": "Contextually encode all user-controlled output and adopt a strict Content-Security-Policy.",
+      "cwe": "CWE-79",
+      "cve": null,
+      "references": [
+        "https://owasp.org/www-community/attacks/xss/"
+      ]
+    },
+    {
+      "id": "3c27ad35a5cf2fc8",
+      "tool": "nuclei",
+      "severity": "high",
+      "category": "exposure, git",
+      "title": "Exposed .git Directory",
+      "description": "The .git directory is publicly accessible, potentially exposing source code and history.",
+      "url": "https://demo.example.com/.git/config",
+      "parameter": null,
+      "evidence": null,
+      "recommendation": "Review the finding and apply the relevant vendor patch or mitigation.",
+      "cwe": null,
+      "cve": null,
+      "references": []
+    },
+    {
+      "id": "33be40a2600a52c8",
+      "tool": "nuclei",
+      "severity": "high",
+      "category": "default-logins",
+      "title": "Default Admin Credentials Accepted",
+      "description": "The admin panel accepted a well-known default credential pair.",
+      "url": "https://demo.example.com/admin",
+      "parameter": null,
+      "evidence": null,
+      "recommendation": "Review the finding and apply the relevant vendor patch or mitigation.",
+      "cwe": null,
+      "cve": null,
+      "references": []
+    },
+    {
+      "id": "d93814e674c10c59",
+      "tool": "zap",
+      "severity": "medium",
+      "category": "ZAP-10202",
+      "title": "Absence of Anti-CSRF Tokens",
+      "description": "No anti-CSRF token was found in a HTML submission form.",
+      "url": "https://demo.example.com/account/update",
+      "parameter": null,
+      "evidence": null,
+      "recommendation": "Use anti-CSRF tokens on all state-changing forms.",
+      "cwe": "CWE-352",
+      "cve": null,
+      "references": [
+        "https://owasp.org/www-community/attacks/csrf"
+      ]
+    },
+    {
+      "id": "1f25bdda4f18ebe4",
+      "tool": "zap",
+      "severity": "low",
+      "category": "ZAP-10038",
+      "title": "Content Security Policy (CSP) Header Not Set",
+      "description": "The Content-Security-Policy header is not set on responses, reducing defense-in-depth against XSS and data injection.",
+      "url": "https://demo.example.com/",
+      "parameter": null,
+      "evidence": null,
+      "recommendation": "Add an appropriately scoped Content-Security-Policy header.",
+      "cwe": "CWE-693",
+      "cve": null,
+      "references": [
+        "https://owasp.org/www-project-secure-headers/"
+      ]
+    }
+  ]
+}
