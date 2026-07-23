@@ -81,7 +81,9 @@ class NucleiRunner {
 
     await withRetry(
       () => run('nuclei', args, { timeoutMs: (this.config.timeoutSeconds || 900) * 1000 }),
-      { retries: 2, label: 'nuclei scan' }
+      // A failure that took the full timeout to occur is a hang, not a transient blip -
+      // retrying repeats the same wait for the same outcome instead of failing fast.
+      { retries: 2, label: 'nuclei scan', shouldRetry: (err) => !err.message.includes('timed out') }
     );
 
     const findings = this.parseJsonl(jsonOut);

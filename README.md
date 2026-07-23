@@ -23,6 +23,7 @@ report, and a SARIF file for GitHub code scanning.
 - [Configuration reference](#configuration-reference)
 - [CLI reference](#cli-reference)
 - [Output / reports](#output--reports)
+- [Testing](#testing)
 - [Running in GitHub Actions](#running-in-github-actions)
 - [Docker](#docker)
 - [Folder structure](#folder-structure)
@@ -326,6 +327,19 @@ Normalized finding schema:
 }
 ```
 
+## Testing
+
+There's a small automated test suite in the `test/` folder that checks the
+config-loading logic (merging defaults, validating input, etc.) works the
+way it should. Run it with:
+
+```bash
+npm test
+```
+
+This doesn't scan anything or need Katana/ZAP/Nuclei installed — it just
+checks the framework's own internal logic.
+
 ## Running in GitHub Actions
 
 A ready-to-use workflow is at
@@ -357,6 +371,7 @@ docker run --rm \
 
 ```
 security-framework/
+  index.js                     Programmatic entry point (what you get from require('security-framework'))
   bin/cli.js                   CLI entry point
   config/default.config.json   Full default schema
   core/
@@ -376,10 +391,16 @@ security-framework/
       sarifReporter.js
       htmlReporter.js            Fills templates/report.template.html
       index.js                   Orchestrates all three formats
-    utils/                       logger, exec+retry, fs helpers
+    utils/
+      logger.js                  Console logging helper
+      exec.js                    Runs external CLI tools + retry logic
+      fsHelpers.js                Small file read/write/exists helpers
+      htmlForm.js                 Reads a classic login page's <form> so "form" auth
+                                   only needs a URL + username/password, nothing else
     index.js                     The 8-step pipeline orchestrator
   templates/report.template.html Dashboard HTML/CSS/JS (no CDN dependencies)
   examples/                      Worked config files + sample-output/
+  test/                         Automated tests (run with `npm test`)
   .github/workflows/             Ready-to-use GitHub Actions workflow
   output/                        Scan runs land here (git-ignored)
 ```

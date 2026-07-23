@@ -117,7 +117,18 @@ function buildOverrides(cmdOptions) {
     if (!fs.existsSync(authPath)) {
       throw new Error(`--auth file not found: ${authPath}`);
     }
-    overrides.authentication = readJson(authPath);
+    const authFile = readJson(authPath);
+    // Accept either a bare authentication block ({type, ...}) or a full config-shaped
+    // file ({target, authentication, failOn}) - unwrapping the latter matters because
+    // jamming the whole object into config.authentication leaves it without a "type"
+    // field, which AuthManager silently treats as type "none" (scan proceeds
+    // unauthenticated with no error).
+    const authBlock = authFile.authentication && typeof authFile.authentication === 'object'
+      ? authFile.authentication
+      : authFile;
+    overrides.authentication = authBlock;
+    if (authFile.target && !overrides.target) overrides.target = authFile.target;
+    if (authFile.failOn && !overrides.failOn) overrides.failOn = authFile.failOn;
   }
 
   return overrides;

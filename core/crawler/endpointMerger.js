@@ -50,7 +50,7 @@ function mergeEndpoints({ katanaUrls = [], swaggerEndpoints = [], target = null 
   for (const entry of scopedKatanaUrls) {
     const key = normalizeUrl(entry.url);
     if (!seen.has(key)) {
-      seen.set(key, { url: entry.url, normalizedUrl: key, method: 'GET', sources: ['katana'] });
+      seen.set(key, { url: entry.url, normalizedUrl: key, method: entry.method || 'GET', sources: ['katana'] });
     } else {
       seen.get(key).sources.push('katana');
     }

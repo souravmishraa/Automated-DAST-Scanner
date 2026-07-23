@@ -78,9 +78,13 @@ function run(command, args = [], options = {}) {
  * @param {number} [options.retries=3]
  * @param {number} [options.baseDelayMs=1000]
  * @param {string} [options.label]
+ * @param {(err: Error) => boolean} [options.shouldRetry] - decide whether a given failure is
+ *   worth retrying. Defaults to always-retry. A failure that itself took the full configured
+ *   timeout to occur (a hang, not a fast-failing transient error) should NOT be retried here -
+ *   retrying just repeats the same multi-hour wait for the same outcome.
  */
 async function withRetry(fn, options = {}) {
-  const { retries = 3, baseDelayMs = 1000, label = 'operation' } = options;
+  const { retries = 3, baseDelayMs = 1000, label = 'operation', shouldRetry = () => true } = options;
   let lastError;
 
   for (let attempt = 1; attempt <= retries; attempt++) {
@@ -89,9 +93,12 @@ async function withRetry(fn, options = {}) {
     } catch (err) {
       lastError = err;
       log.warn(`${label} failed (attempt ${attempt}/${retries}): ${err.message}`);
-      if (attempt < retries) {
+      if (attempt < retries && shouldRetry(err)) {
         const delay = baseDelayMs * Math.pow(2, attempt - 1);
         await new Promise((res) => setTimeout(res, delay));
+      } else if (attempt < retries) {
+        log.warn(`${label}: not retrying (failure is not considered transient).`);
+        break;
       }
     }
   }

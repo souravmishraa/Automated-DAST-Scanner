@@ -55,7 +55,7 @@ function isValidUrl(value) {
   }
 }
 
-const VALID_AUTH_TYPES = ['none', 'basic', 'bearer', 'apiKey', 'form', 'cookie', 'oauth'];
+const VALID_AUTH_TYPES = ['none', 'basic', 'bearer', 'apiKey', 'form', 'cookie', 'oauth', 'jsonLogin'];
 
 function validate(config) {
   const errors = [];
@@ -85,6 +85,9 @@ function validate(config) {
   }
   if (authType === 'cookie' && !config.authentication.cookie) {
     errors.push('authentication.type "cookie" requires "cookie".');
+  }
+  if (authType === 'jsonLogin' && (!config.authentication.loginUrl || !config.authentication.username || !config.authentication.password)) {
+    errors.push('authentication.type "jsonLogin" requires "loginUrl", "username", and "password".');
   }
 
   if (errors.length) {

@@ -4,11 +4,7 @@
     "type": "form",
     "loginUrl": "https://staging.example.com/login",
     "username": "test-user@example.com",
-    "password": "REPLACE_ME",
-    "usernameField": "email",
-    "passwordField": "password",
-    "loggedInIndicator": "Sign out",
-    "loggedOutIndicator": "Sign in"
+    "password": "REPLACE_ME"
   },
   "zap": {
     "activeScanMaxDurationMinutes": 45,

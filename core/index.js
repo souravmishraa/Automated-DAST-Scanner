@@ -48,7 +48,7 @@ async function runScan(configInput, overrides = {}) {
 
   // Step 4: Merge + normalize endpoints
   log.step(4, TOTAL_STEPS, 'Merging discovered endpoints');
-  const { endpoints, txtPath: endpointsFile } = mergeEndpoints(
+  const { endpoints, jsonPath: endpointsJsonFile, txtPath: endpointsFile } = mergeEndpoints(
     { katanaUrls: katanaResult.urls, swaggerEndpoints: swaggerResult.endpoints, target: config.target },
     runOutputDir
   );
@@ -56,7 +56,9 @@ async function runScan(configInput, overrides = {}) {
   // Step 5: OWASP ZAP
   log.step(5, TOTAL_STEPS, 'Running OWASP ZAP (passive + active scan)');
   const zap = new ZapRunner(config, authManager, runOutputDir);
-  const zapResult = await zap.run(config.target, endpointsFile);
+  // ZAP is seeded from the JSON endpoint list (carries real HTTP methods) rather than the
+  // plain-text one Nuclei uses, so POST-discovered endpoints get scanned as POST, not GET.
+  const zapResult = await zap.run(config.target, endpointsJsonFile);
 
   // Step 6: Nuclei
   log.step(6, TOTAL_STEPS, 'Running Nuclei template scan');

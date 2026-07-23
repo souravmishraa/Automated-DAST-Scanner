@@ -8,10 +8,8 @@
     "apiKeyHeader": "X-API-Key",
     "apiKeyValue": null,
     "loginUrl": null,
-    "usernameField": "username",
-    "passwordField": "password",
-    "loggedInIndicator": null,
-    "loggedOutIndicator": null,
+    "usernameField": null,
+    "passwordField": null,
     "cookie": null
   },
   "crawler": {
@@ -45,8 +43,27 @@
     "activeScan": true,
     "ajaxSpider": false,
     "spiderMaxDurationMinutes": 10,
-    "activeScanMaxDurationMinutes": 30,
-    "contextName": "security-framework-context"
+    "activeScanMaxDurationMinutes": 90,
+    "contextName": "security-framework-context",
+    "activeScanPolicy": {
+      "defaultStrength": "high",
+      "defaultThreshold": "low",
+      "focusRules": [
+        {"id": 40018, "name": "SQL Injection", "strength": "high", "threshold": "low"},
+        {"id": 40019, "name": "SQL Injection - MySQL (Time Based)", "strength": "high", "threshold": "low"},
+        {"id": 40021, "name": "SQL Injection - Oracle (Time Based)", "strength": "high", "threshold": "low"},
+        {"id": 40022, "name": "SQL Injection - PostgreSQL (Time Based)", "strength": "high", "threshold": "low"},
+        {"id": 40012, "name": "Cross Site Scripting (Reflected)", "strength": "high", "threshold": "low"},
+        {"id": 40014, "name": "Cross Site Scripting (Persistent) - Attack", "strength": "high", "threshold": "low"},
+        {"id": 40016, "name": "Cross Site Scripting (Persistent) - Prime", "strength": "high", "threshold": "low"},
+        {"id": 40017, "name": "Cross Site Scripting (Persistent) - Spider", "strength": "high", "threshold": "low"},
+        {"id": 40026, "name": "Cross Site Scripting (DOM Based)", "strength": "high", "threshold": "low"},
+        {"id": 6, "name": "Path Traversal", "strength": "high", "threshold": "low"},
+        {"id": 90020, "name": "Remote OS Command Injection", "strength": "high", "threshold": "low"},
+        {"id": 90037, "name": "Remote OS Command Injection (Time Based)", "strength": "high", "threshold": "low"},
+        {"id": 90023, "name": "XML External Entity Attack", "strength": "high", "threshold": "low"}
+      ]
+    }
   },
   "nuclei": {
     "severities": ["info", "low", "medium", "high", "critical"],

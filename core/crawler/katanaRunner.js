@@ -24,9 +24,16 @@ class KatanaRunner {
   }
 
   buildArgs(target) {
-    const outFile = path.join(this.runOutputDir, 'katana-urls.txt');
+    const outFile = path.join(this.runOutputDir, 'katana-urls.jsonl');
     const timeoutSec = this.config.timeoutSeconds || 120;
     const maxPages = this.config.maxPages || 500;
+    // Katana's default scope (-fs rdn) is root-domain-based, so a sibling subdomain (e.g.
+    // pwning.owasp-juice.shop vs. our actual target preview.owasp-juice.shop) counts as
+    // "in scope" and gets crawled too - verified empirically: on a real run this wasted
+    // ~6300 of ~8900 crawled URLs chasing a docs subdomain's citation links (Wikipedia,
+    // GitHub, MITRE, ...) before the endpoint-merger's own host filter discarded them
+    // anyway, starving the actual target of crawl budget. Pin the crawl to the exact host.
+    const targetHost = new URL(target).hostname;
     const args = [
       '-u', target,
       '-d', String(this.config.depth || 3),
@@ -35,9 +42,15 @@ class KatanaRunner {
       '-ct', `${timeoutSec}s`,  // hard time cap: katana exits gracefully after N seconds
       '-mdp', String(maxPages), // hard page cap: stop after N pages regardless of depth
       '-fsu',                   // filter similar URLs (e.g. /users/1 == /users/2)
+      '-cs', `^https?://${targetHost.replace(/\./g, '\\.')}`, // pin crawl scope to the exact target host
       '-o', outFile,
       '-silent',
-      '-jc' // include js-crawled endpoints
+      '-jc', // include js-crawled endpoints
+      '-j',  // JSON-lines output - needed to capture request method (plain -o only gives bare URLs)
+      '-or'  // omit raw request/response dumps - we only need url/method, not full traffic.
+             // NOTE: deliberately NOT using -ob (omit response body): JS-crawl mode needs
+             // the response body to parse pages for further links: verified empirically
+             // that -ob alone drops discovery from ~8900 URLs to 20 on a real JS-heavy SPA.
     ];
 
     if (this.config.formExtraction) {
@@ -83,13 +96,30 @@ class KatanaRunner {
       }
     }
 
-    const urls = readLines(outFile).filter(Boolean);
-    log.success(`Katana discovered ${urls.length} URLs`);
+    const structured = this.parseJsonlOutput(outFile);
+    log.success(`Katana discovered ${structured.length} URLs`);
 
-    const structured = urls.map((url) => ({ url, source: 'katana' }));
     writeJson(path.join(this.runOutputDir, 'urls.json'), structured);
 
     return { urls: structured, outFile, skipped: false };
+  }
+
+  /** Parse Katana's -j (JSON-lines) output into {url, method, source} entries. */
+  parseJsonlOutput(outFile) {
+    const entries = [];
+    for (const line of readLines(outFile)) {
+      let parsed;
+      try {
+        parsed = JSON.parse(line);
+      } catch (err) {
+        continue; // skip malformed/partial lines (e.g. a truncated last line on timeout)
+      }
+      const url = parsed.url || (parsed.request && parsed.request.endpoint);
+      if (!url) continue;
+      const method = (parsed.request && parsed.request.method) || 'GET';
+      entries.push({ url, method: method.toUpperCase(), source: 'katana' });
+    }
+    return entries;
   }
 }
 
